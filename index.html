@@ -97,6 +97,13 @@
   #om .rrow.is-A { background:var(--bad-bg); border-left-color:var(--bad); } #om .rrow.is-A .rname, #om .rrow.is-A .rroll { color:var(--bad); }
   #om .rrow.is-L { background:#FFF5CF; border-left-color:#E0A800; } #om .rrow.is-L .rname, #om .rrow.is-L .rroll { color:#7A5600; }
   #om .pal { display:flex; gap:4px; }
+  #om .roster.locked .pal button { pointer-events:none; opacity:.5; } #om .roster.locked .pal button.on { opacity:1; }
+  #om .saved { border-radius:12px; padding:12px 14px; margin:12px 0 4px; background:var(--ok-bg); border:1px solid #B5DEC7; border-left:4px solid var(--ok); font-size:14px; }
+  #om .saved b { color:var(--ok); } #om .saved .muted { font-size:13px; margin:6px 0 0; }
+  #om .saved.old { background:var(--warn-bg); border-color:#F0D49A; border-left-color:var(--warn); } #om .saved.old b { color:var(--warn); }
+  #om .saved.edit { background:var(--gold-50); border-color:var(--gold-300); border-left-color:var(--gold-500); } #om .saved.edit b { color:#7A5B12; }
+  #om .why { font-size:13px; margin:6px 2px 0; }
+  #om select.full { width:100%; }
   #om .pal button { min-width:38px; width:38px; min-height:40px; padding:0; border-radius:9px; box-shadow:none; font-weight:700; color:var(--muted); }
   #om .pal button.on[data-v="P"] { background:var(--ok); border-color:var(--ok); color:#fff; }
   #om .pal button.on[data-v="A"] { background:var(--bad); border-color:var(--bad); color:#fff; }
@@ -162,16 +169,37 @@ const greet = () => { const h = +new Intl.DateTimeFormat('en-GB', { timeZone: 'A
 const first = n => String(n || '').replace(/^(dr|prof|mr|mrs|ms|adv|smt|sri)\.?\s+/i, '').split(/\s+/)[0];
 const usable = () => { const p = lsGet(PK); return p && Array.isArray(p.subjects) && p.subjects.length && Date.parse(p.until) > Date.now() ? p : null; };
 const om = document.getElementById('om'), omv = document.getElementById('omv');
-let S = null, MK = {}, online = false;
+let S = null, MK = {}, online = false, SV = null, ED = false; // SV: the saved period on screen; ED: "Change attendance" tapped
+const istMs = s => Date.parse(String(s).replace(' ', 'T') + '+05:30');
+const istStr = ms => new Date(ms + 330 * 6e4).toISOString().replace('T', ' ').slice(0, 19);
+const clock = s => { const [d, t] = String(s).split(' '); let [h, m] = t.split(':').map(Number); const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12;
+  return (d !== today() ? nice(d) + ', ' : '') + h + ':' + String(m).padStart(2, '0') + ' ' + ap; };
+const hrs = () => (S && S.editHours) || 2;
+const left = s => (s.waiting ? 1 : s.firstAt ? hrs() * 36e5 - (Date.now() - istMs(s.firstAt)) : -1); // ms left to change it; unknown time: locked
+const ptime = (d, p) => { const [y, m, dd] = d.split('-').map(Number); return (((S.periodDays || {})[new Date(y, m - 1, dd).getDay()]) || {})[String(p).toUpperCase()] || ''; };
+const dayPeriods = d => { const l = S.periods.filter(p => ptime(d, p)); return l.length ? l : S.periods; };
+/** Today: the period running now, else the one that just ended, else the first. Other days: the first. */
+function pickPeriod(d) {
+  const l = dayPeriods(d); if (d !== today()) return { p: l[0], why: '' };
+  const mins = s => +s.slice(0, 2) * 60 + +s.slice(3, 5);
+  const n = mins(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date()));
+  const sp = p => ptime(d, p).split('\u2013');
+  const on = l.find(p => { const t = sp(p); return t.length === 2 && mins(t[0]) <= n && n <= mins(t[1]); });
+  if (on) return { p: on, why: 'from the time now' };
+  let last = ''; l.forEach(p => { const t = sp(p); if (t.length === 2 && mins(t[1]) <= n) last = p; });
+  return last ? { p: last, why: 'from the time now (the period that just ended)' } : { p: l[0], why: '' };
+}
+const REASONS = ['Marked a student wrongly by mistake', 'Student came in after marking', 'Student was on official duty', 'Wrong period or date chosen'];
 const banner = () => online ? '<div class="banner on"><i></i><div><b>Back online.</b> Tap <b>Try internet</b> to open MyGLCK; what you saved here is sent then.</div></div>'
   : '<div class="banner"><i></i><div><b>No internet.</b> Attendance marked here is saved on this phone and sent when MyGLCK opens with internet.</div></div>';
 /** A sheet in the app's style instead of the phone's plain alert box. */
-function sheet(html, buttons) {
+function sheet(html, buttons, read) {
   return new Promise(res => {
     const d = document.createElement('div'); d.className = 'sheet';
     d.innerHTML = `<div class="card">${html}<div class="acts">${buttons.map((b, i) => `<button data-i="${i}" class="${b[1] || ''}">${esc(b[0])}</button>`).join('')}</div></div>`;
-    d.onclick = e => { const b = e.target.closest('button[data-i]'); if (!b && e.target !== d) return; d.remove(); res(b ? +b.dataset.i : -1); };
+    d.onclick = e => { const b = e.target.closest('button[data-i]'); if (!b && e.target !== d) return; const v = read && b ? read(d) : null; d.remove(); res(read ? { i: b ? +b.dataset.i : -1, v } : b ? +b.dataset.i : -1); };
     om.appendChild(d);
+    if (read) { const s = d.querySelector('select'), o = d.querySelector('input'); if (s && o) s.onchange = () => { o.hidden = s.value !== '__other'; if (!o.hidden) o.focus(); }; }
   });
 }
 function omHome() {
@@ -186,7 +214,9 @@ function omHome() {
     <div class="section-title">My subjects</div>
     <div class="grid">${p.subjects.map((s, i) => `<div class="card subject" role="button" tabindex="0" data-s="${i}"><div class="top"><span class="chip">${esc(s.subject.code)}</span>${s.linked.length ? '<span class="chip soft">Combined</span>' : ''}</div>
       <h3>${esc(s.subject.name)}</h3><div class="muted">${esc([s.subject.className].concat(s.linked.map(x => x.className)).join(' + '))} · ${s.students.length + s.linked.reduce((n, x) => n + x.students.length, 0)} students</div>
-      <div class="go"><button class="primary" data-s="${i}">Mark attendance</button></div></div>`).join('')}</div>`;
+      <div class="go"><button class="primary" data-s="${i}">Mark attendance</button></div></div>`).join('')}
+      ${(p.missing || []).map(s => `<div class="card subject" style="opacity:.6"><div class="top"><span class="chip">${esc(s.code)}</span></div>
+      <h3>${esc(s.name)}</h3><div class="muted">${esc(s.className || '')}</div><p class="muted" style="margin:10px 0 0">Not on this phone yet. Open MyGLCK once with internet and wait on the home screen for a minute.</p></div>`).join('')}</div>`;
 }
 function omSub(i) {
   const p = usable(); S = p.subjects[i]; MK = {};
@@ -194,18 +224,52 @@ function omSub(i) {
   omv.innerHTML = `<button class="link" data-go="home">← My subjects</button>
     <div class="page-head"><div class="eyebrow">${esc(S.subject.code)} · ${esc(S.subject.className)}</div><h1>${esc(S.subject.name)}</h1></div>${banner()}
     <div class="card"><div class="two"><div><label for="omd">Date</label><input type="date" id="omd" min="${esc(S.term.start)}" max="${esc(max)}" value="${esc(max)}"></div>
-      <div><label for="omp">Period</label><select id="omp">${S.periods.map(x => `<option>${esc(x)}</option>`).join('')}</select></div></div>
+      <div><label for="omp">Period</label><select id="omp"></select></div></div>
+      <p class="why muted" id="omwhy"></p><div id="omst"></div>
       <div class="tools"><span class="muted">Everyone is present until you tap A or L.</span><button class="link" data-go="clear">All present</button></div>
       <div class="roster">${groups.map((g, gi) => `${groups.length > 1 ? `<div class="grp">${esc(g.name)}</div>` : ''}${g.students.map(s => `<div class="rrow" data-row="${gi}|${esc(s.roll)}"><span class="rroll">${esc(s.roll)}</span><span class="rname">${esc(s.name)}</span>
         <div class="pal">${['P', 'A', 'L'].map(v => `<button data-k="${gi}|${esc(s.roll)}" data-v="${v}" class="${v === 'P' ? 'on' : ''}" aria-label="${v === 'P' ? 'Present' : v === 'A' ? 'Absent' : 'Late'}">${v}</button>`).join('')}</div></div>`).join('')}`).join('')}</div></div>`;
-  omBar(true);
+  const d = document.getElementById('omd'), sel = document.getElementById('omp'), pk = pickPeriod(d.value);
+  const fill = keepP => { const l = dayPeriods(d.value); sel.innerHTML = l.map(x => { const t = ptime(d.value, x); return `<option value="${esc(x)}">${esc(x)}${t ? ' \u00B7 ' + esc(t) : ''}</option>`; }).join(''); if (l.includes(keepP)) sel.value = keepP; };
+  fill(pk.p);
+  const t = ptime(d.value, sel.value);
+  document.getElementById('omwhy').textContent = pk.why ? `${pk.p} chosen ${pk.why}${t ? ' (' + t + ')' : ''}. Change it if needed.` : '';
+  d.onchange = () => { fill(sel.value); document.getElementById('omwhy').textContent = ''; omState(); };
+  sel.onchange = () => { document.getElementById('omwhy').textContent = ''; omState(); };
+  omState();
+}
+/** A period already saved (or waiting to send) opens locked with its marks; within the 2 hours "Change attendance" unlocks it. */
+function omState() {
+  const date = document.getElementById('omd').value, per = document.getElementById('omp').value.toUpperCase(), key = x => x.date + '|' + String(x.period).toUpperCase(), me = date + '|' + per;
+  const groups = [S].concat(S.linked), w = outbox().filter(x => x.subjectId === S.subject.id && key(x.input) === me).slice(-1)[0];
+  const hit = groups.map(g => (g.sessions || []).find(x => key(x) === me)), srv = hit.find(Boolean);
+  const ks = Object.keys(MK); MK = {}; ED = false; ks.forEach(paint);
+  SV = w ? { waiting: true, firstAt: srv && srv.firstAt, faculty: srv && srv.faculty, onServer: !!srv, edits: [] } : srv ? Object.assign({ onServer: true }, srv) : null;
+  if (w) { const rolls = s => String(s || '').split(/[\s,;]+/).filter(Boolean);
+    [w.input].concat(w.input.linked || []).forEach((g, gi) => { rolls(g.absent).forEach(r => { MK[gi + '|' + r] = 'A'; }); rolls(g.late).forEach(r => { MK[gi + '|' + r] = 'L'; }); }); }
+  else hit.forEach((x, gi) => { if (x) { (x.absentRolls || []).forEach(r => { MK[gi + '|' + r] = 'A'; }); (x.lateRolls || []).forEach(r => { MK[gi + '|' + r] = 'L'; }); } });
+  Object.keys(MK).forEach(paint); omInfo(); omBar(true);
+}
+function omInfo() {
+  const el = document.getElementById('omst'); if (!el) return;
+  omv.querySelector('.roster').classList.toggle('locked', !!SV && !ED);
+  omv.querySelector('.tools').hidden = !!SV && !ED;
+  if (!SV) { el.innerHTML = ''; return; }
+  const l = left(SV), a = Object.values(MK).filter(v => v === 'A').length, n = Object.values(MK).length - a;
+  const rule = SV.waiting ? 'Waiting on this phone to be sent. You can still change it.' : ED ? 'Make the change, then save. You will be asked for the reason.'
+    : l > 0 ? `You can change it until ${clock(istStr(istMs(SV.firstAt) + hrs() * 36e5))}, with a reason.`
+    : `More than ${hrs()} hours since it was saved. Use Corrections in MyGLCK when you have internet.`;
+  el.innerHTML = `<div class="saved${ED ? ' edit' : l > 0 ? '' : ' old'}" role="status"><b>${ED ? 'Changing saved attendance' : SV.waiting ? 'Saved on this phone' : 'Attendance already saved'}</b><br>
+    ${SV.firstAt && !SV.waiting ? 'Saved ' + esc(clock(SV.firstAt)) + (SV.faculty ? ' by ' + esc(SV.faculty) : '') + ' \u00B7 ' : ''}${a} absent, ${n} late
+    ${(SV.edits || []).map(e => `<div class="muted">Changed ${esc(clock(e.at))}: ${esc(e.reason)}</div>`).join('')}<p class="muted">${rule}</p></div>`;
 }
 function omBar(marking) {
   const old = document.getElementById('ombar'); if (old) old.remove();
   if (!marking) return;
   const n = v => Object.values(MK).filter(x => x === v).length, all = [S].concat(S.linked).reduce((t, g) => t + g.students.length, 0);
   om.insertAdjacentHTML('beforeend', `<div class="savebar" id="ombar"><div class="tally"><div><b>${all - n('A') - n('L')}</b><span>Present</span></div><div class="a"><b>${n('A')}</b><span>Absent</span></div><div class="l"><b>${n('L')}</b><span>Late</span></div></div>
-    <button class="primary" data-go="save">Save on this phone</button></div>`);
+    ${SV && !ED ? (left(SV) > 0 ? '<button class="primary" data-go="edit">Change attendance</button>' : '<button data-go="corr">Locked</button>')
+      : `<button class="primary" data-go="save">${SV ? 'Save change' : 'Save on this phone'}</button>`}</div>`);
 }
 function paint(k) {
   const row = omv.querySelector(`.rrow[data-row="${CSS.escape(k)}"]`); if (!row) return;
@@ -216,20 +280,35 @@ function paint(k) {
 om.addEventListener('click', async e => {
   const b = e.target.closest('[data-s],[data-k],[data-go]'); if (!b || e.target.closest('.sheet')) return;
   if (b.dataset.s != null) return omSub(+b.dataset.s);
+  if (b.dataset.k && SV && !ED) return;
   if (b.dataset.k) { const k = b.dataset.k, v = b.dataset.v; if (v === 'P' || MK[k] === v) delete MK[k]; else MK[k] = v; paint(k); return omBar(true); }
   const go = b.dataset.go;
   if (go === 'home') return omHome();
   if (go === 'reload') return location.reload();
-  if (go === 'clear') { const ks = Object.keys(MK); MK = {}; ks.forEach(paint); return omBar(true); }
+  if (go === 'edit') { ED = true; omInfo(); return omBar(true); }
+  if (go === 'corr') return sheet(`<h2>Use Corrections</h2><p class="muted">More than ${hrs()} hours have passed since this period was saved, so it is locked here. Open MyGLCK with internet and use <b>Corrections</b> to change a student.</p>`, [['OK', 'primary']]);
+  if (go === 'clear') { if (SV && !ED) return; const ks = Object.keys(MK); MK = {}; ks.forEach(paint); return omBar(true); }
   if (go === 'save') {
     const date = document.getElementById('omd').value, period = document.getElementById('omp').value, p = usable();
     if (!date || date > today() || date < S.term.start) return sheet('<h2>Choose the date</h2><p class="muted">A date in the term, today or earlier.</p>', [['OK', 'primary']]);
     const of = (gi, v) => Object.keys(MK).filter(k => k.split('|')[0] === String(gi) && MK[k] === v).map(k => k.slice(k.indexOf('|') + 1)).join(', ');
     const key = x => x.date + '|' + String(x.period).toUpperCase(), me = date + '|' + period.toUpperCase();
-    const before = [S].concat(S.linked).some(g => (g.sessions || []).some(x => key(x) === me)) || outbox().some(x => x.subjectId === S.subject.id && key(x.input) === me);
-    if (before && await sheet(`<h2>Already marked</h2><p class="muted">${esc(nice(date))} ${esc(period)} is already marked (or waiting to send). Replace it when this is sent?</p>`, [['Cancel'], ['Replace when sent', 'primary']]) !== 1) return;
+    const onSrv = [S].concat(S.linked).some(g => (g.sessions || []).some(x => key(x) === me)), before = onSrv || outbox().some(x => x.subjectId === S.subject.id && key(x.input) === me);
+    let reason = '';
+    if (before && SV && !SV.waiting && left(SV) <= 0) return sheet(`<h2>Use Corrections</h2><p class="muted">More than ${hrs()} hours have passed since ${esc(nice(date))} ${esc(period)} was saved.</p>`, [['OK', 'primary']]);
+    if (onSrv) for (;;) { // only a period already in MyGLCK needs a reason
+      const r = await sheet(`<h2>Reason for the change</h2><p class="muted">${esc(nice(date))} ${esc(period)} is already saved. Choose why you are changing it. It is sent with the attendance.</p>
+        <label for="omr">Reason</label><select id="omr" class="full"><option value="">Choose a reason</option>${REASONS.map(x => `<option>${esc(x)}</option>`).join('')}<option value="__other">Other (type the reason)</option></select>
+        <input id="omro" placeholder="Type the reason" maxlength="200" hidden style="margin-top:8px">`, [['Cancel'], ['Save change', 'primary']],
+        d => { const s = d.querySelector('#omr').value; return s === '__other' ? d.querySelector('#omro').value.trim() : s; });
+      if (r.i !== 1) return;
+      if ((reason = r.v)) break;
+      await sheet('<h2>Reason needed</h2><p class="muted">Choose a reason, or type one under Other.</p>', [['OK', 'primary']]);
+    }
+    // An unsent change of the same period replaces the one waiting, so only the last is sent.
+    if (SV && SV.waiting) lsSet(OB, outbox().filter(x => !(x.subjectId === S.subject.id && key(x.input) === me)));
     const item = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), fid: p.fid, subjectId: S.subject.id, code: S.subject.code, className: S.subject.className,
-      input: { date, period, absent: of(0, 'A'), late: of(0, 'L'), linked: S.linked.length ? S.linked.map((x, i) => ({ subjectId: x.id, absent: of(i + 1, 'A'), late: of(i + 1, 'L') })) : undefined },
+      input: { date, period, absent: of(0, 'A'), late: of(0, 'L'), reason: reason || undefined, linked: S.linked.length ? S.linked.map((x, i) => ({ subjectId: x.id, absent: of(i + 1, 'A'), late: of(i + 1, 'L') })) : undefined },
       offAt: new Date().toISOString(), replace: before };
     lsSet(OB, outbox().concat([item]));
     await sheet(`<div class="tick">✓</div><h2>Saved on this phone</h2><p class="muted">${esc(S.subject.code)} · ${esc(nice(date))} · ${esc(period)}: ${item.input.absent ? 'absent ' + esc(item.input.absent) : 'everyone present'}${item.input.late ? ', late ' + esc(item.input.late) : ''}.<br>It is sent when MyGLCK opens with internet.</p>`, [['Done', 'primary']]);
