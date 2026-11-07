@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MyGLCK · Government Law College, Kozhikode</title>
+<meta name="description" content="Attendance, claims and internal assessment for Government Law College, Kozhikode.">
+<meta name="theme-color" content="#0B1240">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MyGLCK">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  html, body { margin:0; height:100%; background:#0B1240; overflow:hidden; }
+  /* The frame cannot see the iPhone notch insets, so the shell keeps it below the status bar (indigo shows behind it). */
+  iframe { position:fixed; top:env(safe-area-inset-top); left:0; right:0; bottom:0; width:100%; height:calc(100% - env(safe-area-inset-top)); border:0; background:#F3F6F5; }
+  #splash { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; color:#fff;
+    font:500 15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; text-align:center; padding:24px;
+    background:radial-gradient(700px 420px at 15% 0%, rgba(20,148,143,.5), transparent 60%), linear-gradient(155deg,#0B1240 0%,#10275A 52%,#075755 100%);
+    transition:opacity .35s; z-index:2; }
+  #splash.gone { opacity:0; pointer-events:none; }
+  #splash img { width:112px; height:112px; border-radius:50%; background:#fff; padding:8px; box-shadow:0 0 0 10px rgba(255,255,255,.08), 0 20px 50px rgba(0,0,0,.4); }
+  #splash b { display:block; font:600 21px/1.3 Georgia,"Times New Roman",serif; }
+  #splash i { color:#E3CC92; font-family:Georgia,serif; }
+  .bar { width:120px; height:3px; border-radius:3px; overflow:hidden; background:rgba(255,255,255,.15); position:relative; }
+  .bar::before { content:""; position:absolute; inset:0 auto 0 -40%; width:40%; background:#E3CC92; animation:s 1.1s ease-in-out infinite; }
+  @keyframes s { to { left:100%; } }
+  #offline { display:none; } .off #offline { display:block; } .off .bar { display:none; }
+  /* Install banner: Android / Chrome get an Install button; iPhone gets the Share steps (Safari has no install button). */
+  #inst { position:fixed; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:3; display:none; align-items:center; gap:12px;
+    padding:12px 12px 12px 14px; border-radius:14px; background:#0B1240; color:#fff; box-shadow:0 12px 34px rgba(0,0,0,.35);
+    font:500 14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; max-width:520px; margin:0 auto; }
+  #inst.on { display:flex; }
+  #inst img { width:40px; height:40px; border-radius:50%; background:#fff; padding:3px; flex:none; }
+  #inst div { flex:1; } #inst b { display:block; font-size:15px; }
+  #inst .go { font:600 14px system-ui,sans-serif; padding:10px 16px; border-radius:10px; border:0; background:#E3CC92; color:#0B1240; flex:none; }
+  #inst .x { background:none; border:0; color:#fff; opacity:.7; font-size:22px; line-height:1; padding:4px 6px; flex:none; }
+  #offline button { margin-top:14px; font:600 15px system-ui,sans-serif; padding:12px 22px; border-radius:10px; border:0; background:#0C7D79; color:#fff; }
+</style>
+</head>
+<body>
+<div id="splash">
+  <img src="icon-192.png" alt="">
+  <div><b>MyGLCK</b>Government Law College, Kozhikode<br><i>Legal Education for Social Justice</i></div>
+  <div class="bar"></div>
+  <div id="offline">You are offline. Connect to the internet to mark attendance.<br><button onclick="location.reload()">Try again</button></div>
+</div>
+<div id="inst" role="dialog" aria-label="Install MyGLCK">
+  <img src="icon-192.png" alt="">
+  <div><b>Install MyGLCK</b><span id="insttxt">Open it from your home screen like any app.</span></div>
+  <button class="go" id="instgo" hidden>Install</button>
+  <button class="x" id="instx" aria-label="Not now">&times;</button>
+</div>
+<script>
+// Paste the Apps Script "Web app URL" (ends in /exec) here once.
+const APP_URL = 'https://script.google.com/macros/s/AKfycbzfFLI2q79URWbBB2annmTCSr50Jc3dA8zTMss1hODTpRg4u5ukDri7m-wZx3_i6Mj6Ng/exec';
+
+const splash = document.getElementById('splash');
+if (!navigator.onLine) splash.classList.add('off');
+else {
+  const f = document.createElement('iframe');
+  f.src = APP_URL + '?pwa=' + encodeURIComponent(location.href.split('?')[0]); f.title = 'MyGLCK'; f.allow = 'clipboard-write';
+  f.onload = () => setTimeout(() => splash.classList.add('gone'), 250);
+  document.body.appendChild(f);
+}
+window.addEventListener('offline', () => { splash.classList.remove('gone'); splash.classList.add('off'); });
+window.addEventListener('online', () => { if (splash.classList.contains('off')) location.reload(); });
+
+// Install banner: not when already installed; "Not now" hides it for 7 days.
+(() => {
+  const inst = document.getElementById('inst'), go = document.getElementById('instgo'), KEY = 'myglck-install-later';
+  const installed = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  let later = 0; try { later = +localStorage.getItem(KEY) || 0; } catch (e) {}
+  if (installed || Date.now() < later) return;
+  const show = () => setTimeout(() => inst.classList.add('on'), 1500);
+  document.getElementById('instx').onclick = () => { inst.classList.remove('on'); try { localStorage.setItem(KEY, Date.now() + 7 * 864e5); } catch (e) {} };
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (ios) { document.getElementById('insttxt').innerHTML = 'Tap <b style="display:inline">Share</b> &#x2191; below, then <b style="display:inline">Add to Home Screen</b>.'; show(); return; }
+  let ev = null;
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); ev = e; go.hidden = false; show(); });
+  go.onclick = async () => { inst.classList.remove('on'); ev.prompt(); await ev.userChoice; ev = null; };
+  addEventListener('appinstalled', () => inst.classList.remove('on'));
+})();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
