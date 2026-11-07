@@ -38,6 +38,80 @@
   #inst div { flex:1; } #inst b { display:block; font-size:15px; }
   #inst .go { font:600 14px system-ui,sans-serif; padding:10px 16px; border-radius:10px; border:0; background:#E3CC92; color:#0B1240; flex:none; }
   #inst .x { background:none; border:0; color:#fff; opacity:.7; font-size:22px; line-height:1; padding:4px 6px; flex:none; }
+  /* Offline marking (no internet when the app opens): the same look as MyGLCK, from the class lists it kept on this phone. */
+  #om { --teal-800:#075755; --teal-700:#0A6A67; --teal-600:#0C7D79; --teal-100:#D3EBE9; --teal-50:#EBF6F5; --indigo-900:#0B1240; --indigo-800:#141C5E; --indigo-50:#EEF0FA;
+    --gold-500:#B8923A; --gold-300:#E3CC92; --gold-50:#FBF6EA; --bg:#F3F6F5; --surface:#fff; --surface-2:#F7FAF9; --ink:#132029; --muted:#62717C; --line:#E0E7E6; --line-2:#C9D4D3;
+    --ok:#11744A; --ok-bg:#E2F3E9; --bad:#B42318; --bad-bg:#FCEBE9; --warn:#8F5300; --warn-bg:#FDF3E0;
+    --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --shadow-1:0 1px 2px rgba(16,32,40,.06),0 1px 1px rgba(16,32,40,.03); --shadow-2:0 12px 32px -12px rgba(11,30,50,.22),0 2px 6px rgba(11,30,50,.06);
+    position:fixed; inset:0; z-index:4; overflow:auto; -webkit-overflow-scrolling:touch; background:var(--bg); color:var(--ink); font:15px/1.5 var(--font); -webkit-font-smoothing:antialiased; }
+  #om[hidden] { display:none; }
+  #om * { box-sizing:border-box; }
+  #om .topbar { position:sticky; top:0; z-index:3; display:flex; align-items:center; gap:12px; min-height:60px; padding:8px 12px; padding-top:max(8px, env(safe-area-inset-top)); color:#fff;
+    background:linear-gradient(100deg,var(--indigo-900) 0%,#0F2556 48%,var(--teal-800) 100%); box-shadow:0 4px 18px -6px rgba(6,18,40,.45); }
+  #om .topbar::after { content:""; position:absolute; left:0; right:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold-500),transparent); opacity:.75; }
+  #om .brand { display:flex; align-items:center; gap:12px; flex:1; min-width:0; }
+  #om .brand img { width:38px; height:38px; border-radius:50%; background:#fff; padding:3px; box-shadow:0 0 0 2px rgba(255,255,255,.22); flex:none; }
+  #om .brand b { display:block; font:600 16px/1.2 var(--serif); letter-spacing:.2px; }
+  #om .brand small { display:block; font-size:12.5px; opacity:.75; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #om main { max-width:720px; margin:0 auto; padding:16px 14px calc(110px + env(safe-area-inset-bottom)); }
+  #om h1, #om h2, #om h3 { font-family:var(--serif); font-weight:600; color:var(--indigo-900); margin:0; }
+  #om h1 { font-size:24px; line-height:1.2; } #om h2 { font-size:19px; margin-bottom:8px; } #om h3 { font-size:18px; margin:12px 0 4px; }
+  #om .eyebrow { font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gold-500); margin-bottom:4px; }
+  #om .page-head { margin:4px 0 16px; }
+  #om .muted { color:var(--muted); font-size:14px; }
+  #om .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:var(--shadow-1); margin:0 0 12px; }
+  #om .banner { display:flex; gap:12px; align-items:flex-start; background:var(--indigo-50); color:var(--indigo-800); border-radius:12px; padding:12px 14px; margin:0 0 16px; font-size:14px; }
+  #om .banner i { flex:none; width:10px; height:10px; border-radius:50%; background:#E0A800; margin-top:5px; box-shadow:0 0 0 4px rgba(224,168,0,.2); }
+  #om .banner.on i { background:var(--ok); box-shadow:0 0 0 4px rgba(17,116,74,.2); }
+  #om .section-title { display:flex; align-items:center; gap:10px; margin:22px 0 12px; font:600 13px var(--font); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  #om .section-title::after { content:""; flex:1; height:1px; background:var(--line); }
+  #om .chip { display:inline-block; font:600 12px/1 var(--font); letter-spacing:.04em; padding:6px 10px; border-radius:8px; background:var(--indigo-50); color:var(--indigo-800); }
+  #om .chip.soft { background:var(--gold-50); color:#7A5B12; } #om .chip.wait { background:var(--warn-bg); color:var(--warn); }
+  #om .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; }
+  #om .subject { display:flex; flex-direction:column; gap:4px; text-align:left; cursor:pointer; margin:0; transition:box-shadow .2s, border-color .2s, transform .08s; }
+  #om .subject:active { transform:scale(.99); border-color:var(--teal-100); box-shadow:var(--shadow-2); }
+  #om .subject .top { display:flex; gap:6px; flex-wrap:wrap; }
+  #om .subject h3 { margin:8px 0 0; }
+  #om .subject .go { margin-top:10px; }
+  #om .outbox { border-left:4px solid var(--gold-500); }
+  #om .ob { display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-top:1px solid var(--line); }
+  #om .ob:first-of-type { border-top:0; }
+  #om .ob div { flex:1; min-width:0; } #om .ob small { display:block; color:var(--muted); font-size:13px; }
+  #om button { appearance:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; padding:9px 16px; border-radius:10px;
+    border:1px solid var(--line-2); background:var(--surface); color:var(--ink); font:600 14px/1.2 var(--font); cursor:pointer; box-shadow:var(--shadow-1); -webkit-tap-highlight-color:transparent; }
+  #om button:active { transform:translateY(1px) scale(.98); background:#E8EFEE; box-shadow:none; }
+  #om button.primary { background:linear-gradient(180deg,var(--teal-600),var(--teal-700)); border-color:var(--teal-700); color:#fff; box-shadow:0 2px 6px -1px rgba(10,106,103,.45); }
+  #om button.ghost { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.3); color:#fff; box-shadow:none; min-height:36px; padding:8px 12px; flex:none; }
+  #om button.link { background:none; border:0; box-shadow:none; color:var(--teal-700); padding:6px 0; min-height:0; }
+  #om label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin:0 0 6px; }
+  #om input, #om select { font:16px var(--font); width:100%; min-height:44px; padding:10px 12px; border:1px solid var(--line-2); border-radius:10px; background:#fff; color:var(--ink); }
+  #om .two { display:flex; gap:10px; } #om .two > div { flex:1; min-width:0; }
+  #om .tools { display:flex; justify-content:space-between; align-items:center; margin:12px 0 4px; }
+  #om .roster { margin:0 -16px; }
+  #om .grp { font:600 13px var(--font); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:14px 16px 6px; }
+  #om .rrow { display:grid; grid-template-columns:minmax(24px,auto) minmax(0,1fr) auto; align-items:center; gap:8px; padding:8px 10px 8px 12px; border-bottom:1px solid var(--line); border-left:4px solid transparent; }
+  #om .rrow:last-child { border-bottom:0; }
+  #om .rroll { font-weight:600; font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  #om .rname { font-size:15px; font-weight:600; line-height:1.22; overflow-wrap:anywhere; }
+  #om .rrow.is-A { background:var(--bad-bg); border-left-color:var(--bad); } #om .rrow.is-A .rname, #om .rrow.is-A .rroll { color:var(--bad); }
+  #om .rrow.is-L { background:#FFF5CF; border-left-color:#E0A800; } #om .rrow.is-L .rname, #om .rrow.is-L .rroll { color:#7A5600; }
+  #om .pal { display:flex; gap:4px; }
+  #om .pal button { min-width:38px; width:38px; min-height:40px; padding:0; border-radius:9px; box-shadow:none; font-weight:700; color:var(--muted); }
+  #om .pal button.on[data-v="P"] { background:var(--ok); border-color:var(--ok); color:#fff; }
+  #om .pal button.on[data-v="A"] { background:var(--bad); border-color:var(--bad); color:#fff; }
+  #om .pal button.on[data-v="L"] { background:#E0A800; border-color:#E0A800; color:#2B1D00; }
+  #om .savebar { position:fixed; left:0; right:0; bottom:0; z-index:3; display:flex; align-items:center; gap:12px; padding:12px 16px max(12px, env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.96); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); border-top:1px solid var(--line); box-shadow:0 -6px 20px -12px rgba(11,30,50,.25); }
+  #om .tally { display:flex; gap:16px; margin-right:auto; }
+  #om .tally div { display:flex; flex-direction:column; line-height:1.05; }
+  #om .tally b { font-size:20px; font-variant-numeric:tabular-nums; } #om .tally span { font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  #om .tally .a b { color:var(--bad); } #om .tally .l b { color:#8A6200; }
+  #om .savebar .primary { flex:0 1 auto; }
+  #om .sheet { position:fixed; inset:0; z-index:5; display:flex; align-items:flex-end; justify-content:center; background:rgba(11,18,64,.42); padding:16px; }
+  #om .sheet .card { width:100%; max-width:440px; margin:0 0 env(safe-area-inset-bottom); box-shadow:var(--shadow-2); border-radius:16px; padding:20px; }
+  #om .sheet .acts { display:flex; gap:10px; justify-content:flex-end; margin-top:14px; } #om .sheet .acts button { flex:1; }
+  #om .tick { width:44px; height:44px; border-radius:50%; background:var(--ok-bg); color:var(--ok); display:flex; align-items:center; justify-content:center; font:700 22px var(--font); margin-bottom:10px; }
   #offline button { margin-top:14px; font:600 15px system-ui,sans-serif; padding:12px 22px; border-radius:10px; border:0; background:#0C7D79; color:#fff; }
 </style>
 </head>
@@ -46,8 +120,10 @@
   <img src="icon-192.png" alt="">
   <div><b>MyGLCK</b>Government Law College, Kozhikode<br><i>Legal Education for Social Justice</i></div>
   <div class="bar"></div>
-  <div id="offline">You are offline. Connect to the internet to mark attendance.<br><button onclick="location.reload()">Try again</button></div>
+  <div id="offline">You are offline. Open MyGLCK once with internet (with "Keep me signed in" ticked) and it can be marked offline.<br><button onclick="location.reload()">Try again</button></div>
+  <button id="slowoff" hidden style="margin-top:6px;font:600 14px system-ui,sans-serif;padding:10px 16px;border-radius:10px;border:0;background:#E3CC92;color:#0B1240">Slow internet? Mark offline</button>
 </div>
+<div id="om" hidden><header class="topbar"><div class="brand"><img src="icon-192.png" alt=""><div><b>MyGLCK</b><small id="omwho">Offline marking</small></div></div><button class="ghost" data-go="reload">Try internet</button></header><main id="omv"></main></div>
 <div id="inst" role="dialog" aria-label="Install MyGLCK">
   <img src="icon-192.png" alt="">
   <div><b>Install MyGLCK</b><span id="insttxt">Open it from your home screen like any app.</span></div>
@@ -58,16 +134,124 @@
 // Paste the Apps Script "Web app URL" (ends in /exec) here once.
 const APP_URL = 'https://script.google.com/macros/s/AKfycbzfFLI2q79URWbBB2annmTCSr50Jc3dA8zTMss1hODTpRg4u5ukDri7m-wZx3_i6Mj6Ng/exec';
 
+// For testing on this computer only: http://localhost:<port>/?app=<local copy of the app>.
+const DEV = location.hostname === 'localhost';
+const APP = DEV && /^http:\/\/localhost:\d+\/$/.test(new URLSearchParams(location.search).get('app') || '') ? new URLSearchParams(location.search).get('app') : APP_URL;
 const splash = document.getElementById('splash');
-if (!navigator.onLine) splash.classList.add('off');
+let loaded = false;
+// ---------- Offline marking ----------
+// MyGLCK (inside the frame) hands this page the class lists while online ("Keep me signed in" only) and takes back what is marked here.
+// Messages are accepted only from Google's Apps Script frames; nothing here talks to any server.
+const PK = 'myglck-pack', OB = 'myglck-outbox';
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const okOrigin = o => /^https:\/\/[\w-]+\.googleusercontent\.com$/.test(o) || o === 'https://script.google.com' || (DEV && /^http:\/\/localhost:\d+$/.test(o));
+const outbox = () => lsGet(OB) || [];
+addEventListener('message', e => {
+  const d = e.data; if (!d || d.myglck !== 1 || !okOrigin(e.origin)) return;
+  if (d.t === 'pack' && d.pack && Array.isArray(d.pack.subjects)) lsSet(PK, d.pack);
+  if (d.t === 'hello') { const items = outbox().filter(x => x.fid === d.fid); if (items.length && e.source) e.source.postMessage({ myglck: 1, t: 'outbox', items }, e.origin); }
+  if (d.t === 'took' && Array.isArray(d.ids)) { const l = outbox().filter(x => d.ids.indexOf(x.id) < 0); lsSet(OB, l.length ? l : null); }
+  if (d.t === 'signout') { lsSet(PK, null); const l = outbox().filter(x => x.fid !== d.fid); lsSet(OB, l.length ? l : null); }
+});
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+const MONS = 'JanFebMarAprMayJunJulAugSepOctNovDec';
+const nice = iso => { const [y, m, d] = iso.split('-'); return `${+d} ${MONS.substr((m - 1) * 3, 3)} ${y}`; };
+const greet = () => { const h = +new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: 'numeric', hourCycle: 'h23' }).format(new Date()); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
+const first = n => String(n || '').replace(/^(dr|prof|mr|mrs|ms|adv|smt|sri)\.?\s+/i, '').split(/\s+/)[0];
+const usable = () => { const p = lsGet(PK); return p && Array.isArray(p.subjects) && p.subjects.length && Date.parse(p.until) > Date.now() ? p : null; };
+const om = document.getElementById('om'), omv = document.getElementById('omv');
+let S = null, MK = {}, online = false;
+const banner = () => online ? '<div class="banner on"><i></i><div><b>Back online.</b> Tap <b>Try internet</b> to open MyGLCK; what you saved here is sent then.</div></div>'
+  : '<div class="banner"><i></i><div><b>No internet.</b> Attendance marked here is saved on this phone and sent when MyGLCK opens with internet.</div></div>';
+/** A sheet in the app's style instead of the phone's plain alert box. */
+function sheet(html, buttons) {
+  return new Promise(res => {
+    const d = document.createElement('div'); d.className = 'sheet';
+    d.innerHTML = `<div class="card">${html}<div class="acts">${buttons.map((b, i) => `<button data-i="${i}" class="${b[1] || ''}">${esc(b[0])}</button>`).join('')}</div></div>`;
+    d.onclick = e => { const b = e.target.closest('button[data-i]'); if (!b && e.target !== d) return; d.remove(); res(b ? +b.dataset.i : -1); };
+    om.appendChild(d);
+  });
+}
+function omHome() {
+  const p = usable(); S = null; MK = {}; omBar();
+  document.getElementById('omwho').textContent = p ? `${p.name} · offline` : 'Offline marking';
+  if (!p) { omv.innerHTML = `${banner()}<div class="card"><h2>No class lists on this phone yet</h2><p class="muted">Open MyGLCK once with internet, signed in with <b>Keep me signed in on this phone</b> ticked. Your class lists are then kept here, and attendance can be marked without internet.</p></div>`; return; }
+  const l = outbox();
+  omv.innerHTML = `<div class="page-head"><div class="eyebrow">Offline marking</div><h1>${esc(greet())}, ${esc(first(p.name))}</h1></div>${banner()}
+    ${l.length ? `<div class="card outbox"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><h2 style="margin:0;flex:1">Waiting to send</h2><span class="chip wait">${l.length}</span></div>
+      ${l.map(x => `<div class="ob"><div><b>${esc(x.code)}</b> ${esc(x.className)} · ${esc(nice(x.input.date))} · ${esc(x.input.period)}
+        <small>Absent: ${esc(x.input.absent || 'none')}${x.input.late ? ' · Late: ' + esc(x.input.late) : ''} · saved ${esc(new Date(x.offAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit' }))}</small></div></div>`).join('')}</div>` : ''}
+    <div class="section-title">My subjects</div>
+    <div class="grid">${p.subjects.map((s, i) => `<div class="card subject" role="button" tabindex="0" data-s="${i}"><div class="top"><span class="chip">${esc(s.subject.code)}</span>${s.linked.length ? '<span class="chip soft">Combined</span>' : ''}</div>
+      <h3>${esc(s.subject.name)}</h3><div class="muted">${esc([s.subject.className].concat(s.linked.map(x => x.className)).join(' + '))} · ${s.students.length + s.linked.reduce((n, x) => n + x.students.length, 0)} students</div>
+      <div class="go"><button class="primary" data-s="${i}">Mark attendance</button></div></div>`).join('')}</div>`;
+}
+function omSub(i) {
+  const p = usable(); S = p.subjects[i]; MK = {};
+  const max = today() < S.term.end ? today() : S.term.end, groups = [{ name: S.subject.className, students: S.students }].concat(S.linked.map(x => ({ name: x.className, students: x.students })));
+  omv.innerHTML = `<button class="link" data-go="home">← My subjects</button>
+    <div class="page-head"><div class="eyebrow">${esc(S.subject.code)} · ${esc(S.subject.className)}</div><h1>${esc(S.subject.name)}</h1></div>${banner()}
+    <div class="card"><div class="two"><div><label for="omd">Date</label><input type="date" id="omd" min="${esc(S.term.start)}" max="${esc(max)}" value="${esc(max)}"></div>
+      <div><label for="omp">Period</label><select id="omp">${S.periods.map(x => `<option>${esc(x)}</option>`).join('')}</select></div></div>
+      <div class="tools"><span class="muted">Everyone is present until you tap A or L.</span><button class="link" data-go="clear">All present</button></div>
+      <div class="roster">${groups.map((g, gi) => `${groups.length > 1 ? `<div class="grp">${esc(g.name)}</div>` : ''}${g.students.map(s => `<div class="rrow" data-row="${gi}|${esc(s.roll)}"><span class="rroll">${esc(s.roll)}</span><span class="rname">${esc(s.name)}</span>
+        <div class="pal">${['P', 'A', 'L'].map(v => `<button data-k="${gi}|${esc(s.roll)}" data-v="${v}" class="${v === 'P' ? 'on' : ''}" aria-label="${v === 'P' ? 'Present' : v === 'A' ? 'Absent' : 'Late'}">${v}</button>`).join('')}</div></div>`).join('')}`).join('')}</div></div>`;
+  omBar(true);
+}
+function omBar(marking) {
+  const old = document.getElementById('ombar'); if (old) old.remove();
+  if (!marking) return;
+  const n = v => Object.values(MK).filter(x => x === v).length, all = [S].concat(S.linked).reduce((t, g) => t + g.students.length, 0);
+  om.insertAdjacentHTML('beforeend', `<div class="savebar" id="ombar"><div class="tally"><div><b>${all - n('A') - n('L')}</b><span>Present</span></div><div class="a"><b>${n('A')}</b><span>Absent</span></div><div class="l"><b>${n('L')}</b><span>Late</span></div></div>
+    <button class="primary" data-go="save">Save on this phone</button></div>`);
+}
+function paint(k) {
+  const row = omv.querySelector(`.rrow[data-row="${CSS.escape(k)}"]`); if (!row) return;
+  const v = MK[k] || 'P';
+  row.classList.toggle('is-A', v === 'A'); row.classList.toggle('is-L', v === 'L');
+  row.querySelectorAll('.pal button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+}
+om.addEventListener('click', async e => {
+  const b = e.target.closest('[data-s],[data-k],[data-go]'); if (!b || e.target.closest('.sheet')) return;
+  if (b.dataset.s != null) return omSub(+b.dataset.s);
+  if (b.dataset.k) { const k = b.dataset.k, v = b.dataset.v; if (v === 'P' || MK[k] === v) delete MK[k]; else MK[k] = v; paint(k); return omBar(true); }
+  const go = b.dataset.go;
+  if (go === 'home') return omHome();
+  if (go === 'reload') return location.reload();
+  if (go === 'clear') { const ks = Object.keys(MK); MK = {}; ks.forEach(paint); return omBar(true); }
+  if (go === 'save') {
+    const date = document.getElementById('omd').value, period = document.getElementById('omp').value, p = usable();
+    if (!date || date > today() || date < S.term.start) return sheet('<h2>Choose the date</h2><p class="muted">A date in the term, today or earlier.</p>', [['OK', 'primary']]);
+    const of = (gi, v) => Object.keys(MK).filter(k => k.split('|')[0] === String(gi) && MK[k] === v).map(k => k.slice(k.indexOf('|') + 1)).join(', ');
+    const key = x => x.date + '|' + String(x.period).toUpperCase(), me = date + '|' + period.toUpperCase();
+    const before = [S].concat(S.linked).some(g => (g.sessions || []).some(x => key(x) === me)) || outbox().some(x => x.subjectId === S.subject.id && key(x.input) === me);
+    if (before && await sheet(`<h2>Already marked</h2><p class="muted">${esc(nice(date))} ${esc(period)} is already marked (or waiting to send). Replace it when this is sent?</p>`, [['Cancel'], ['Replace when sent', 'primary']]) !== 1) return;
+    const item = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), fid: p.fid, subjectId: S.subject.id, code: S.subject.code, className: S.subject.className,
+      input: { date, period, absent: of(0, 'A'), late: of(0, 'L'), linked: S.linked.length ? S.linked.map((x, i) => ({ subjectId: x.id, absent: of(i + 1, 'A'), late: of(i + 1, 'L') })) : undefined },
+      offAt: new Date().toISOString(), replace: before };
+    lsSet(OB, outbox().concat([item]));
+    await sheet(`<div class="tick">✓</div><h2>Saved on this phone</h2><p class="muted">${esc(S.subject.code)} · ${esc(nice(date))} · ${esc(period)}: ${item.input.absent ? 'absent ' + esc(item.input.absent) : 'everyone present'}${item.input.late ? ', late ' + esc(item.input.late) : ''}.<br>It is sent when MyGLCK opens with internet.</p>`, [['Done', 'primary']]);
+    omHome();
+  }
+});
+function showOffline() {
+  if (!usable()) { splash.classList.remove('gone'); splash.classList.add('off'); return; }
+  om.hidden = false; splash.classList.add('gone'); omHome();
+}
+if (!navigator.onLine) showOffline();
 else {
   const f = document.createElement('iframe');
-  f.src = APP_URL + '?pwa=' + encodeURIComponent(location.href.split('?')[0]); f.title = 'MyGLCK'; f.allow = 'clipboard-write';
-  f.onload = () => setTimeout(() => splash.classList.add('gone'), 250);
+  f.src = APP + '?pwa=' + encodeURIComponent(location.href.split('?')[0]); f.title = 'MyGLCK'; f.allow = 'clipboard-write';
+  f.onload = () => { loaded = true; setTimeout(() => splash.classList.add('gone'), 250); };
   document.body.appendChild(f);
+  // Connected but nothing loads (weak signal): offer offline marking after 15 seconds.
+  setTimeout(() => { if (!loaded && usable()) { const b = document.getElementById('slowoff'); b.hidden = false; b.onclick = showOffline; } }, 15000);
 }
-window.addEventListener('offline', () => { splash.classList.remove('gone'); splash.classList.add('off'); });
-window.addEventListener('online', () => { if (splash.classList.contains('off')) location.reload(); });
+// Once MyGLCK is open it handles a lost connection itself (it keeps the period and sends it later); this page steps in only before it has loaded.
+window.addEventListener('offline', () => { if (!loaded) showOffline(); });
+window.addEventListener('online', () => { if (!om.hidden) { online = true; const bn = omv.querySelector('.banner'); if (bn) bn.outerHTML = banner(); } else if (splash.classList.contains('off')) location.reload(); });
 
 // Install banner: not when already installed; "Not now" hides it for 7 days.
 (() => {
