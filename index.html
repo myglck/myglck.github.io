@@ -34,6 +34,9 @@
     padding:12px 12px 12px 14px; border-radius:14px; background:#0B1240; color:#fff; box-shadow:0 12px 34px rgba(0,0,0,.35);
     font:500 14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; max-width:520px; margin:0 auto; }
   #inst.on { display:flex; }
+  #gerr { position:fixed; left:12px; right:12px; top:calc(12px + env(safe-area-inset-top)); z-index:4; display:none; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:14px; background:#0B1240; color:#fff; font:15px/1.45 system-ui,sans-serif; box-shadow:0 10px 30px rgba(0,0,0,.35); }
+  #gerr.on { display:flex; } #gerr div { flex:1; } #gerr b { display:block; margin-bottom:2px; }
+  #gerr button { background:none; border:0; color:#fff; opacity:.75; font-size:22px; line-height:1; padding:2px 6px; flex:none; }
   #inst img { width:40px; height:40px; border-radius:50%; background:#fff; padding:3px; flex:none; }
   #inst div { flex:1; } #inst b { display:block; font-size:15px; }
   #inst .go { font:600 14px system-ui,sans-serif; padding:10px 16px; border-radius:10px; border:0; background:#E3CC92; color:#0B1240; flex:none; }
@@ -131,6 +134,7 @@
   <button id="slowoff" hidden style="margin-top:6px;font:600 14px system-ui,sans-serif;padding:10px 16px;border-radius:10px;border:0;background:#E3CC92;color:#0B1240">Slow internet? Mark offline</button>
 </div>
 <div id="om" hidden><header class="topbar"><div class="brand"><img src="icon-192.png" alt=""><div><b>MyGLCK</b><small id="omwho">Offline marking</small></div></div><button class="ghost" data-go="reload">Try internet</button></header><main id="omv"></main></div>
+<div id="gerr" role="alert"><div><b>Seeing a Google page that says "Sorry"?</b>Google cannot open MyGLCK when this browser is signed in to more than one Google account. Open this link in a private window, or in a browser with no Google account signed in. You do not need a Google account for MyGLCK.</div><button id="gerrx" aria-label="Close">&times;</button></div>
 <div id="inst" role="dialog" aria-label="Install MyGLCK">
   <img src="icon-192.png" alt="">
   <div><b>Install MyGLCK</b><span id="insttxt">Open it from your home screen like any app.</span></div>
@@ -154,8 +158,10 @@ const lsGet = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (
 const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const okOrigin = o => /^https:\/\/[\w-]+\.googleusercontent\.com$/.test(o) || o === 'https://script.google.com' || (DEV && /^http:\/\/localhost:\d+$/.test(o));
 const outbox = () => lsGet(OB) || [];
+let appReady = false; // MyGLCK says so from inside the frame; Google's error page cannot
 addEventListener('message', e => {
   const d = e.data; if (!d || d.myglck !== 1 || !okOrigin(e.origin)) return;
+  if (d.t === 'ready') { appReady = true; document.getElementById('gerr').classList.remove('on'); }
   if (d.t === 'pack' && d.pack && Array.isArray(d.pack.subjects)) lsSet(PK, d.pack);
   if (d.t === 'hello') { const items = outbox().filter(x => x.fid === d.fid); if (items.length && e.source) e.source.postMessage({ myglck: 1, t: 'outbox', items }, e.origin); }
   if (d.t === 'took' && Array.isArray(d.ids)) { const l = outbox().filter(x => d.ids.indexOf(x.id) < 0); lsSet(OB, l.length ? l : null); }
@@ -323,7 +329,8 @@ if (!navigator.onLine) showOffline();
 else {
   const f = document.createElement('iframe');
   f.src = APP + '?pwa=' + encodeURIComponent(location.href.split('?')[0]); f.title = 'MyGLCK'; f.allow = 'clipboard-write';
-  f.onload = () => { loaded = true; setTimeout(() => splash.classList.add('gone'), 250); };
+  f.onload = () => { loaded = true; setTimeout(() => splash.classList.add('gone'), 250); setTimeout(() => { if (!appReady) document.getElementById('gerr').classList.add('on'); }, 8000); };
+  document.getElementById('gerrx').onclick = () => document.getElementById('gerr').classList.remove('on');
   document.body.appendChild(f);
   // Connected but nothing loads (weak signal): offer offline marking after 15 seconds.
   setTimeout(() => { if (!loaded && usable()) { const b = document.getElementById('slowoff'); b.hidden = false; b.onclick = showOffline; } }, 15000);
