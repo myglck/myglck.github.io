@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com http://localhost:*; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>Class attendance and internal marks · MyGLCK</title>
+<meta name="description" content="Published attendance and internal marks of a class at Government Law College, Kozhikode. View only.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MyGLCK">
+<meta property="og:title" content="MyGLCK · Class attendance and internal marks">
+<meta property="og:description" content="Published attendance and internal marks of a class at Government Law College, Kozhikode. View only.">
+<meta property="og:image" content="https://myglck.github.io/icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0B1240">
+<link rel="icon" href="../icon-192.png">
+<style>
+  :root { --navy:#0B1240; --ink:#152029; --muted:#5A6670; --line:#E1E6E8; --bg:#F3F6F5; --surface:#fff; --gold:#7A5B12; --gold-2:#E3CC92; --teal:#1F6F69; --teal-50:#E7F3F1;
+    --b1:#FFF7DF; --b1t:#7A5300; --b2:#FFE8CC; --b2t:#8F4300; --b3:#FCE3E0; --b3t:#A02318; color-scheme:light; }
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  .top { background:linear-gradient(155deg,#0B1240 0%,#10275A 60%,#0A4F4C 100%); color:#fff; padding:calc(14px + env(safe-area-inset-top)) 16px 18px; }
+  .brand { display:flex; align-items:center; gap:10px; max-width:960px; margin:0 auto; }
+  .brand img { width:38px; height:38px; border-radius:50%; background:#fff; padding:2px; flex:none; }
+  .brand b { display:block; font:600 16px/1.2 Georgia,"Times New Roman",serif; }
+  .brand small { opacity:.8; font-size:12.5px; }
+  .head { max-width:960px; margin:14px auto 0; }
+  .k { font:700 11px/1 system-ui,sans-serif; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-2); }
+  h1 { font:600 25px/1.2 Georgia,"Times New Roman",serif; margin:6px 0 2px; }
+  .head p { margin:0; opacity:.85; font-size:13.5px; }
+  main { max-width:960px; margin:0 auto; padding:0 16px 40px; }
+  .tabs { display:flex; gap:6px; overflow-x:auto; padding:12px 0 10px; margin:0; position:sticky; top:0; z-index:5; background:var(--bg); scrollbar-width:none; }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tabs button { flex:none; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:999px; padding:8px 14px; font:600 13.5px system-ui,sans-serif; cursor:pointer; white-space:nowrap; }
+  .tabs button[aria-selected="true"] { background:var(--navy); border-color:var(--navy); color:#fff; }
+  .tabs button .dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#B8C0C4; margin-left:6px; vertical-align:1px; }
+  .tabs button.has .dot { background:#2E9B6F; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px; margin:0 0 14px; }
+  h2 { font:600 19px/1.3 Georgia,"Times New Roman",serif; margin:0 0 2px; }
+  h2 .code { font:700 13px/1 system-ui,sans-serif; letter-spacing:.04em; color:var(--teal); display:block; margin-bottom:6px; }
+  h3 { font-size:15px; margin:0 0 10px; }
+  dl { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:12px 0 0; font-size:13.5px; }
+  dt { color:var(--muted); } dd { margin:0; font-weight:600; }
+  .note { font-size:13px; color:var(--muted); margin:10px 0 0; }
+  .warn { background:#FFF4D6; border:1px solid #F0D58A; color:#5C4300; border-radius:10px; padding:9px 12px; font-size:13.5px; margin:12px 0 0; }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 12px; font-size:12.5px; color:var(--muted); margin:0 0 10px; }
+  .legend span { display:inline-flex; align-items:center; gap:6px; }
+  .legend i { width:12px; height:12px; border-radius:3px; display:inline-block; }
+  .find { display:flex; gap:8px; align-items:center; margin:0 0 10px; }
+  .find input { flex:1; min-width:0; font:15px system-ui,sans-serif; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff; }
+  .find span { font-size:13px; color:var(--muted); }
+  table { width:100%; border-collapse:collapse; font-size:14px; table-layout:fixed; }
+  col.c-roll { width:44px; } col.c-n { width:72px; } col.c-p { width:76px; } col.c-m { width:84px; }
+  th { position:sticky; top:var(--tabs, 52px); z-index:2; background:#F7F9F8; color:var(--muted); font:700 11px/1.25 system-ui,sans-serif; letter-spacing:.05em; text-transform:uppercase; text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
+  td { padding:9px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  th.n { text-align:right; }
+  th.mh { text-transform:none; letter-spacing:0; font-size:11.5px; overflow-wrap:break-word; }
+  .roll { width:40px; font-variant-numeric:tabular-nums; color:var(--muted); }
+  .pc { font-weight:700; }
+  td.nm { overflow-wrap:break-word; }
+  .rb { all:unset; cursor:pointer; display:block; font-weight:600; color:var(--ink); }
+  .rb::after { content:" \25BE"; color:#9AA4AA; font-size:11px; }
+  .rb[aria-expanded="true"]::after { content:" \25B4"; }
+  .rb:focus-visible { outline:2px solid var(--teal); outline-offset:2px; border-radius:4px; }
+  tr.b1 td { background:var(--b1); } tr.b1 .pc { color:var(--b1t); }
+  tr.b2 td { background:var(--b2); } tr.b2 .pc { color:var(--b2t); }
+  tr.b3 td { background:var(--b3); } tr.b3 .pc { color:var(--b3t); }
+  tr.b1 td:first-child { box-shadow:inset 3px 0 #E8B93A; } tr.b2 td:first-child { box-shadow:inset 3px 0 #E58B2B; } tr.b3 td:first-child { box-shadow:inset 3px 0 #D2463A; }
+  tr.me td { background:var(--teal-50) !important; } tr.me td:first-child { box-shadow:inset 4px 0 var(--teal) !important; color:var(--teal); font-weight:700; }
+  tr.det td { background:#FAFBFB; font-size:13.5px; color:var(--ink); padding:10px 8px 12px; }
+  tr.det.b1 td, tr.det.b2 td, tr.det.b3 td { background:#FAFBFB; }
+  .facts { display:grid; grid-template-columns:repeat(auto-fit, minmax(118px, 1fr)); gap:6px 14px; margin:0; }
+  .facts div { display:flex; justify-content:space-between; gap:8px; border-bottom:1px dashed var(--line); padding:2px 0; }
+  .facts b { font-variant-numeric:tabular-nums; }
+  .dates { margin:10px 0 0; }
+  .dates b { display:block; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .chip { display:inline-block; border:1px solid var(--line); background:#fff; border-radius:999px; padding:2px 9px; margin:0 4px 4px 0; font-size:12.5px; font-variant-numeric:tabular-nums; }
+  .chip.c { border-color:#9FD3BD; background:#EAF7F0; }
+  .subs { margin:0; padding:0; list-style:none; }
+  .subs li { display:grid; grid-template-columns:1fr auto; gap:2px 10px; padding:6px 0; border-bottom:1px dashed var(--line); }
+  .subs li:last-child { border-bottom:0; }
+  .subs .v { font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap; }
+  .subs small { color:var(--muted); }
+  .subs.st li { grid-template-columns:1fr; } .subs.st .v { text-align:left; white-space:normal; }
+  .total td { font-weight:700; background:#F7F9F8; }
+  .empty { text-align:center; color:var(--muted); padding:28px 12px; }
+  .msg { max-width:520px; margin:40px auto; text-align:center; color:var(--muted); }
+  footer { max-width:960px; margin:0 auto; padding:0 16px 32px; font-size:12.5px; color:var(--muted); }
+  footer a { color:var(--teal); }
+  @media (max-width:520px) { main { padding:0 10px 32px; } .card { padding:14px 12px; } col.c-roll { width:34px; } col.c-n { width:50px; } col.c-p { width:60px; } col.c-m { width:52px; }
+    th { text-transform:none; letter-spacing:0; font-size:11.5px; } td, th { padding-left:4px; padding-right:4px; } }
+  @media (max-width:360px) { table { font-size:13.5px; } col.c-roll { width:30px; } col.c-n { width:52px; } col.c-p { width:54px; } th { padding-left:3px; padding-right:3px; } }
+  @media print { .tabs, .find, footer a { display:none; } .top { background:none; color:#000; padding:0 0 8px; } .k { color:#7A5B12; } th { position:static; } body { background:#fff; } .card { border:0; padding:0; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img src="../icon-192.png" alt=""><div><b>MyGLCK</b><small>Government Law College, Kozhikode</small></div></div>
+  <div class="head"><div class="k">Class page &middot; view only</div><h1 id="title">Loading&hellip;</h1><p id="sub"></p></div>
+</header>
+<main id="main"><p class="msg" id="msg">Loading the published attendance&hellip;</p></main>
+<footer id="foot" hidden></footer>
+<script src="page.js"></script>
+</body>
+</html>
