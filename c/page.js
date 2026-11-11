@@ -70,7 +70,7 @@ function subjectHtml(s) {
   const headCard = `<div class="card"><h2><span class="code">${esc(s.code)}${s.practical ? ' · Practical' : ''}</span>${esc(s.name)}</h2>
     <dl><dt>Faculty</dt><dd>${esc(s.faculty.join(', ') || '—')}</dd>
     ${p ? `<dt>Attendance</dt><dd>${esc(day(p.from))} to ${esc(day(p.upto))} · ${esc(p.held)} class${p.held === 1 ? '' : 'es'} held</dd>
-      <dt>Minimum</dt><dd>${esc(thr)}%${s.practical ? ' (a practical, on its own)' : D.aggregate ? ' for all subjects together' : ''}</dd>
+      <dt>Minimum</dt><dd>${esc(thr)}%${s.practical ? (p && p.note ? ' (a practical). ' + esc(p.note) : ' (a practical, on its own)') : D.aggregate ? ' for all subjects together' : ''}</dd>
       <dt>Published</dt><dd>${esc(when(p.at))} by ${esc(p.by)}</dd>` : ''}</dl>
     ${p && p.changed ? '<p class="warn">The attendance was corrected after this was published. The faculty will publish it again.</p>' : ''}
     ${p && p.error ? '<p class="warn">This register could not be read when it was published.</p>' : ''}</div>`;
