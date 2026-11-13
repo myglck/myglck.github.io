@@ -83,13 +83,13 @@ function subjectHtml(s) {
         <div class="facts"><div><span>Present</span><b>${num(r[5])}</b></div><div><span>Late</span><b>${num(r[6])}</b></div>
         <div><span>Lates counted absent</span><b>${num(r[7])}</b></div><div><span>Approved claims</span><b>${num(r[8])}</b></div><div><span>Absent</span><b>${num(r[9])}</b></div></div>
         <div class="dates"><b>Absent in ${esc(p.label)}</b>${r[10].length ? r[10].map(a => `<span class="chip${a[2] ? ' c' : ''}">${esc(a[0])} · ${esc(a[1])}${a[2] ? ' · claim approved' : ''}</span>`).join('') : '<span class="note">None</span>'}</div></td></tr>`;
-      return `<tr class="${b}" data-roll="${esc(r[0])}"><td class="roll">${esc(r[0])}</td><td class="nm"><button class="rb" data-o="${id}" aria-expanded="${isOpen}" aria-controls="d-${id}">${esc(r[1])}</button></td>
+      return `<tr class="${b}" data-roll="${esc(r[0])}"><td class="roll">${esc(r[0])}</td><td class="nm"><button class="rb" data-o="${id}" aria-expanded="${isOpen}" aria-controls="d-${id}">${r[1] ? esc(r[1]) : 'Details'}</button></td>
         <td class="n">${num(r[2])}</td><td class="n">${num(r[3])}</td><td class="n pc">${pct(r[4])}</td></tr>${det}`;
     }).join('');
     att = `<div class="card"><h3>Attendance</h3>${hl ? legend(thr) : `<p class="note" style="margin:0 0 10px">For LL.M. the minimum (${esc(thr)}%) is for all subjects together: see Consolidated.</p>`}
       ${findHtml()}
-      <table>${COLS}<thead><tr><th class="roll">Roll</th><th>Name</th><th class="n">Present</th><th class="n">Absent</th><th class="n">%</th></tr></thead><tbody>${rows}</tbody></table>
-      <p class="note">Present includes approved claims. Absent includes lates counted as absent. Tap a name for the details and the absent dates.</p></div>`;
+      <table>${COLS}<thead><tr><th class="roll">Roll</th><th></th><th class="n">Present</th><th class="n">Absent</th><th class="n">%</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="note">Present includes approved claims. Absent includes lates counted as absent. Tap Details for the absent dates.</p></div>`;
   }
   return headCard + att + (s.marks ? marksHtml(s.marks) : '');
 }
@@ -100,14 +100,14 @@ function marksHtml(m) {
   const head = cols.map(p => `<th class="n mh">${esc(p.label)}<br>/${esc(p.max)}</th>`).join('') + (m.total ? `<th class="n mh">Total<br>/${esc(m.total.max)}</th>` : '');
   const rows = m.rows.map((r, i) => {
     const id = 'm' + i, isOpen = open.has(id);
-    const name = compact ? `<button class="rb" data-o="${id}" aria-expanded="${isOpen}" aria-controls="d-${id}">${esc(r[1])}</button>` : esc(r[1]);
+    const name = compact ? `<button class="rb" data-o="${id}" aria-expanded="${isOpen}" aria-controls="d-${id}">${r[1] ? esc(r[1]) : 'Details'}</button>` : (r[1] ? esc(r[1]) : '');
     const det = compact ? `<tr class="det" id="d-${id}"${isOpen ? '' : ' hidden'}><td></td><td colspan="2"><ul class="subs">${m.parts.map((p, j) => `<li><span>${esc(p.label)}</span><span class="v"><b>${num(r[2][j])}</b> / ${esc(p.max)}</span></li>`).join('')}</ul></td></tr>` : '';
     return `<tr data-roll="${esc(r[0])}"><td class="roll">${esc(r[0])}</td><td class="nm">${name}</td>${cols.map((p, j) => `<td class="n">${num(r[2][j])}</td>`).join('')}${m.total ? `<td class="n pc">${num(r[3])}</td>` : ''}</tr>${det}`;
   }).join('');
   const colg = `<colgroup><col class="c-roll"><col>${cols.map(() => '<col class="c-m">').join('')}${m.total ? '<col class="c-m">' : ''}</colgroup>`;
   return `<div class="card"><h3>Internal marks</h3><dl style="margin-top:0"><dt>Shown</dt><dd>${esc(when(m.at))}${m.by ? ' by ' + esc(m.by) : ''}</dd></dl>
-    <table style="margin-top:10px">${colg}<thead><tr><th class="roll">Roll</th><th>Name</th>${head}</tr></thead><tbody>${rows}</tbody></table>
-    ${compact ? '<p class="note">Tap a name for each part.</p>' : ''}
+    <table style="margin-top:10px">${colg}<thead><tr><th class="roll">Roll</th><th></th>${head}</tr></thead><tbody>${rows}</tbody></table>
+    ${compact ? '<p class="note">Tap Details for each part.</p>' : ''}
     ${m.total && m.total.attMax ? `<p class="note">The total includes up to ${esc(m.total.attMax)} marks for attendance.</p>` : ''}
     ${m.practical && m.total ? '<p class="note">A practical is passed on four conditions together, not on the total alone. Each student sees their own conditions in the MyGLCK app.</p>' : ''}
     <p class="note">Only the parts the faculty has shown are listed. A dash means no mark is entered yet.</p></div>`;
@@ -118,7 +118,7 @@ function consHtml() {
   const rows = c.rows.map((r, i) => {
     const id = 'c' + i, b = band(r[4], thr), isOpen = open.has(id);
     const subs = c.subjects.map((s, j) => { const v = r[5][j]; return `<li><span><b>${esc(s[0])}</b> <small>${esc(s[1])}</small></span><span class="v">${v ? `${esc(v[0])} present · ${esc(v[1])} absent · <b>${pct(v[2])}</b>` : '<small>no class held</small>'}</span></li>`; }).join('');
-    return `<tr class="${b}" data-roll="${esc(r[0])}"><td class="roll">${esc(r[0])}</td><td class="nm"><button class="rb" data-o="${id}" aria-expanded="${isOpen}" aria-controls="d-${id}">${esc(r[1])}</button></td>
+    return `<tr class="${b}" data-roll="${esc(r[0])}"><td class="roll">${esc(r[0])}</td><td class="nm"><button class="rb" data-o="${id}" aria-expanded="${isOpen}" aria-controls="d-${id}">${r[1] ? esc(r[1]) : 'Details'}</button></td>
       <td class="n">${num(r[2])}</td><td class="n">${num(r[3])}</td><td class="n pc">${pct(r[4])}</td></tr>
       <tr class="det" id="d-${id}"${isOpen ? '' : ' hidden'}><td></td><td colspan="4"><ul class="subs st">${subs}</ul></td></tr>`;
   }).join('');
@@ -126,8 +126,8 @@ function consHtml() {
     <dl><dt>Class Teacher</dt><dd>${esc(c.by)}</dd><dt>Attendance</dt><dd>to ${esc(day(c.upto))} (${esc(c.label)})</dd><dt>Minimum</dt><dd>${esc(thr)}%</dd><dt>Published</dt><dd>${esc(when(c.at))}</dd></dl>
     ${c.changed ? '<p class="warn">The attendance was corrected after this was published. The Class Teacher will publish it again.</p>' : ''}</div>
     <div class="card"><h3>Every subject together</h3>${legend(thr)}${findHtml()}
-    <table>${COLS}<thead><tr><th class="roll">Roll</th><th>Name</th><th class="n">Present</th><th class="n">Absent</th><th class="n">%</th></tr></thead><tbody>${rows}</tbody></table>
-    <p class="note">The totals of every subject. Tap a name for each subject's present, absent and %.</p></div>`;
+    <table>${COLS}<thead><tr><th class="roll">Roll</th><th></th><th class="n">Present</th><th class="n">Absent</th><th class="n">%</th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="note">The totals of every subject. Tap Details for each subject's present, absent and %.</p></div>`;
 }
 
 const COLS = '<colgroup><col class="c-roll"><col><col class="c-n"><col class="c-n"><col class="c-p"></colgroup>';
