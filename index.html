@@ -325,8 +325,7 @@ function showOffline() {
   if (!usable()) { splash.classList.remove('gone'); splash.classList.add('off'); return; }
   om.hidden = false; splash.classList.add('gone'); omHome();
 }
-if (!navigator.onLine) showOffline();
-else {
+function openApp() {
   const f = document.createElement('iframe');
   f.src = APP + '?pwa=' + encodeURIComponent(location.href.split('?')[0]); f.title = 'MyGLCK'; f.allow = 'clipboard-write';
   f.onload = () => { loaded = true; setTimeout(() => splash.classList.add('gone'), 250); setTimeout(() => { if (!appReady) document.getElementById('gerr').classList.add('on'); }, 8000); };
@@ -335,6 +334,9 @@ else {
   // Connected but nothing loads (weak signal): offer offline marking after 15 seconds.
   setTimeout(() => { if (!loaded && usable()) { const b = document.getElementById('slowoff'); b.hidden = false; b.onclick = showOffline; } }, 15000);
 }
+// Some browsers (VPNs, network extensions) say "offline" while connected, so check the network before giving up.
+const reach = () => Promise.race([fetch(APP_URL, { mode: 'no-cors', cache: 'no-store' }).then(() => true, () => false), new Promise(r => setTimeout(() => r(false), 6000))]);
+if (navigator.onLine) openApp(); else reach().then(ok => ok ? openApp() : showOffline());
 // Once MyGLCK is open it handles a lost connection itself (it keeps the period and sends it later); this page steps in only before it has loaded.
 window.addEventListener('offline', () => { if (!loaded) showOffline(); });
 window.addEventListener('online', () => { if (!om.hidden) { online = true; const bn = omv.querySelector('.banner'); if (bn) bn.outerHTML = banner(); } else if (splash.classList.contains('off')) location.reload(); });
