@@ -161,11 +161,28 @@ const outbox = () => lsGet(OB) || [];
 let appReady = false; // MyGLCK says so from inside the frame; Google's error page cannot
 addEventListener('message', e => {
   const d = e.data; if (!d || d.myglck !== 1 || !okOrigin(e.origin)) return;
-  if (d.t === 'ready') { appReady = true; document.getElementById('gerr').classList.remove('on'); }
+  if (d.t === 'ready') { appReady = true; appWin = e.source; appOrigin = e.origin; document.getElementById('gerr').classList.remove('on'); guard(); }
+  if (d.t === 'backDone' && e.source === appWin) backDone(d.handled !== false);
   if (d.t === 'pack' && d.pack && Array.isArray(d.pack.subjects)) lsSet(PK, d.pack);
   if (d.t === 'hello') { const items = outbox().filter(x => x.fid === d.fid); if (items.length && e.source) e.source.postMessage({ myglck: 1, t: 'outbox', items }, e.origin); }
   if (d.t === 'took' && Array.isArray(d.ids)) { const l = outbox().filter(x => d.ids.indexOf(x.id) < 0); lsSet(OB, l.length ? l : null); }
   if (d.t === 'signout') { lsSet(PK, null); const l = outbox().filter(x => x.fid !== d.fid); lsSet(OB, l.length ? l : null); }
+});
+// ---------- The phone's back button ----------
+// One extra history step keeps a back press inside the app: MyGLCK is asked to step back (close a dialog, go back a screen).
+// When it is on a home screen it says so and shows "Press back again"; a second back within 2 seconds leaves.
+let appWin = null, appOrigin = '', armed = null, asked = null;
+const guard = () => { if (!history.state || history.state.myglck !== 'guard') history.pushState({ myglck: 'guard' }, ''); };
+function backDone(handled) {
+  clearTimeout(asked); asked = null;
+  if (handled) { guard(); return; }
+  armed = setTimeout(() => { armed = null; guard(); }, 2000); // no second back: stay in the app
+}
+addEventListener('popstate', () => {
+  if (armed) { clearTimeout(armed); armed = null; history.back(); return; } // second back: leave
+  if (!appWin || !om.hidden) { guard(); return; } // the offline screen: stay
+  try { appWin.postMessage({ myglck: 1, t: 'back' }, appOrigin); } catch (e) { backDone(false); return; }
+  asked = setTimeout(() => backDone(false), 1500); // no answer (still loading): a second back leaves
 });
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
