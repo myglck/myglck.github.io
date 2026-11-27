@@ -158,14 +158,23 @@ const lsGet = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (
 const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const okOrigin = o => /^https:\/\/[\w-]+\.googleusercontent\.com$/.test(o) || o === 'https://script.google.com' || (DEV && /^http:\/\/localhost:\d+$/.test(o));
 const outbox = () => lsGet(OB) || [];
-let appReady = false; // MyGLCK says so from inside the frame; Google's error page cannot
+// The staff link (#word-word-NN): kept on this phone and passed to MyGLCK, which asks the server whether it is right.
+// The words are taken off the address bar at once; this page holds no key of its own.
+const SKK = 'myglck-skey';
+(() => { const h = decodeURIComponent(location.hash.slice(1)).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  if (/^[a-z]+-[a-z]+-\d{2}$/.test(h)) lsSet(SKK, h);
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search); })();
+let appReady = false, appFrame = null; // MyGLCK says so from inside the frame; Google's error page cannot
+// Only windows inside this page's own app frame count (another tab or a frame of some other site never does).
+const fromMine = w => { for (let i = 0; w && appFrame && i < 6; i++) { if (w === appFrame.contentWindow) return true; if (w === w.parent) return false; w = w.parent; } return false; };
 addEventListener('message', e => {
-  const d = e.data; if (!d || d.myglck !== 1 || !okOrigin(e.origin)) return;
+  const d = e.data; if (!d || d.myglck !== 1 || !okOrigin(e.origin) || !fromMine(e.source)) return;
   if (d.t === 'ready') { appReady = true; appWin = e.source; appOrigin = e.origin; document.getElementById('gerr').classList.remove('on'); guard(); }
   if (d.t === 'backDone' && e.source === appWin) backDone(d.handled !== false);
   if (d.t === 'pack' && d.pack && Array.isArray(d.pack.subjects)) lsSet(PK, d.pack);
   if (d.t === 'hello') { const items = outbox().filter(x => x.fid === d.fid); if (items.length && e.source) e.source.postMessage({ myglck: 1, t: 'outbox', items }, e.origin); }
   if (d.t === 'took' && Array.isArray(d.ids)) { const l = outbox().filter(x => d.ids.indexOf(x.id) < 0); lsSet(OB, l.length ? l : null); }
+  if (d.t === 'skey') lsSet(SKK, /^[a-z]+-[a-z]+-\d{2}$/.test(d.k || '') ? d.k : null); // the staff link, from MyGLCK after sign-in
   if (d.t === 'signout') { lsSet(PK, null); const l = outbox().filter(x => x.fid !== d.fid); lsSet(OB, l.length ? l : null); }
 });
 // ---------- The phone's back button ----------
@@ -343,8 +352,8 @@ function showOffline() {
   om.hidden = false; splash.classList.add('gone'); omHome();
 }
 function openApp() {
-  const f = document.createElement('iframe');
-  f.src = APP + '?pwa=' + encodeURIComponent(location.href.split('?')[0]); f.title = 'MyGLCK'; f.allow = 'clipboard-write';
+  const f = appFrame = document.createElement('iframe');
+  f.src = APP + '?pwa=' + encodeURIComponent(location.href.split(/[?#]/)[0]) + (lsGet(SKK) ? '&k=' + encodeURIComponent(lsGet(SKK)) : ''); f.title = 'MyGLCK'; f.allow = 'clipboard-write';
   f.onload = () => { loaded = true; setTimeout(() => splash.classList.add('gone'), 250); setTimeout(() => { if (!appReady) document.getElementById('gerr').classList.add('on'); }, 8000); };
   document.getElementById('gerrx').onclick = () => document.getElementById('gerr').classList.remove('on');
   document.body.appendChild(f);
